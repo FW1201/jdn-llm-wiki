@@ -2,11 +2,19 @@
 
 A **role-based, LLM-maintained knowledge base** architecture specification — designed so AI agents (Claude Code, Codex, Antigravity, or any LLM agent) can read this document and replicate the entire file management strategy from scratch.
 
+## Language versions / 語言版本
+
+| Language | File |
+|----------|------|
+| 🇬🇧 English | [JDN_llm_wiki.md](JDN_llm_wiki.md) |
+| 🇹🇼 繁體中文 | [JDN_llm_wiki_zh.md](JDN_llm_wiki_zh.md) |
+
 ## What's in this repo
 
 | File | Description |
 |------|-------------|
-| [JDN_llm_wiki.md](JDN_llm_wiki.md) | Full architecture specification |
+| [JDN_llm_wiki.md](JDN_llm_wiki.md) | Full architecture specification (English) |
+| [JDN_llm_wiki_zh.md](JDN_llm_wiki_zh.md) | 完整架構規格說明（繁體中文） |
 
 ## What this spec covers
 
@@ -28,7 +36,7 @@ A **role-based, LLM-maintained knowledge base** architecture specification — d
 
 ## Quick start (for AI agents)
 
-1. Read `JDN_llm_wiki.md` in full
+1. Read `JDN_llm_wiki.md` (English) or `JDN_llm_wiki_zh.md` (繁體中文) in full
 2. Follow **Section 10: Agent Replication Checklist**
 3. Adapt the role definitions (Section 3) to your use case
 4. Run your first `/wiki ingest` with Section 5.1
