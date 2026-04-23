@@ -22,7 +22,7 @@ A **role-based, LLM-maintained knowledge base** architecture specification — d
 - **Role-based organization** — partitioning knowledge by persona/workflow
 - **Page schema** — frontmatter spec, page types, naming conventions
 - **Workflow specifications** — `/wiki ingest`, `/wiki query`, `/wiki lint`, `/wiki status`
-- **Knowledge graph integration** — when and how to use Graphify
+- **Knowledge graph** — visual navigation via Obsidian built-in Graph View
 - **Cross-role design patterns** — bridge, synthesis, and reuse patterns
 - **Sync architecture** — Git + Obsidian + Notion three-layer model
 - **Complete file templates** — copy-paste ready for source-summary, synthesis, index, log entries
@@ -43,4 +43,4 @@ A **role-based, LLM-maintained knowledge base** architecture specification — d
 
 ---
 
-🤖 Spec authored with Claude Code | Version 1.0 | 2026-04-15
+🤖 Spec authored with Claude Code | Version 1.1 | 2026-04-24
