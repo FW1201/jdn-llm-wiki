@@ -65,13 +65,7 @@ Use this system when you have:
 │       └── {synthesis-topic}.md
 ├── docs/                 ← Human-authored design documents (not agent-maintained)
 ├── artifacts/            ← Agent-generated outputs (PDFs, slides, docx)
-├── archive/              ← Deprecated/superseded materials
-└── graphify-out/         ← Knowledge graph outputs (auto-generated)
-    ├── GRAPH_REPORT.md   ← Human-readable graph analysis
-    ├── graph.html        ← Interactive visualization
-    ├── graph.json        ← Raw graph data
-    ├── manifest.json     ← File tracking manifest
-    └── cache/            ← Per-file semantic extraction cache
+└── archive/              ← Deprecated/superseded materials
 ```
 
 ### 2.1 Naming Conventions
@@ -92,7 +86,6 @@ Use this system when you have:
 | Synthesized wiki pages | `wiki/` | ✅ Yes |
 | Design decisions, specs | `docs/` | ❌ Human only |
 | Generated outputs (docx, PDF) | `artifacts/` | ✅ Yes |
-| Graph outputs | `graphify-out/` | ✅ Auto-generated |
 
 ---
 
@@ -352,54 +345,9 @@ Wiki 統計（截至 YYYY-MM-DD）
 
 ---
 
-## 6. Knowledge Graph Integration (Graphify)
+## 6. Knowledge Graph
 
-### 6.1 What Graphify Does
-
-Graphify scans all files in the project, extracts semantic nodes and edges via LLM, clusters them into communities, and outputs:
-- `graphify-out/GRAPH_REPORT.md` — human-readable analysis
-- `graphify-out/graph.html` — interactive visualization
-- `graphify-out/graph.json` — machine-readable graph
-
-### 6.2 When to Run `/graphify`
-
-| Trigger | Action |
-|---------|--------|
-| After ingesting 10+ new pages | Run full graphify update |
-| After creating a new role namespace | Run to see how it clusters |
-| Before starting a major synthesis project | Read GRAPH_REPORT.md first |
-| Monthly maintenance | Run to detect drift and orphans |
-
-### 6.3 Reading GRAPH_REPORT.md
-
-**Key sections to check**:
-
-1. **God Nodes** — highest-connectivity nodes = your core abstractions
-   - If a wiki page is a god node: it's probably underdeveloped (too many things point to it but it doesn't expand)
-   - If a raw source is a god node: you probably need to ingest it into multiple wiki pages
-
-2. **Communities** — detected clusters of related content
-   - Healthy: each community maps roughly to a role or sub-topic
-   - Warning: if two roles are in the same community, check for missing boundary pages
-   - Warning: if a community has 1 member, it's isolated — add links
-
-3. **Surprising Connections** — edges the graph inferred that you didn't explicitly create
-   - Review these: some are valid insights to capture in cross-role pages
-   - Others are false positives from similar terminology — add disambiguation
-
-4. **Hyperedges** — group relationships
-   - These represent thematic groupings; verify they match your mental model
-
-### 6.4 Incremental Updates
-
-Graphify uses a file-hash cache (`graphify-out/cache/`). On subsequent runs:
-- Unchanged files reuse cached extraction (no LLM cost)
-- Only new/modified files are re-extracted
-- The graph is rebuilt from the full merged dataset each time
-
-**Cache management**:
-- Do NOT manually delete cache files unless you want full re-extraction
-- If a file is deleted from the project, its cache entry becomes orphaned — run `/graphify clean` to prune
+Visual graph navigation is handled by **Obsidian's built-in graph view**. Graphify was removed on 2026-04-24 due to high token cost (230+ LLM calls per update). Use `/wiki lint` to catch orphaned pages and missing links instead.
 
 ---
 
@@ -469,8 +417,6 @@ Layer 3: Notion (task/dashboard sink)
 # Artifacts that regenerate
 artifacts/*.pdf
 artifacts/*.docx
-graphify-out/graph.html
-graphify-out/.graphify_*.json
 
 # Private notes not for sync
 docs/private/
@@ -660,7 +606,7 @@ Append to `wiki/log.md` — NEVER overwrite:
 ```markdown
 ## [YYYY-MM-DD] {operation} | {brief description}
 
-- **操作**：{ingest | query | lint | graphify | update}
+- **操作**：{ingest | query | lint | update}
 - **範圍**：{N files / N pages / role name}
 - **結果**：{N pages created, N updated, N errors}
 - **備註**：{any notable observations}
@@ -676,7 +622,7 @@ An agent reading this document for the first time should follow these steps to i
 
 ```
 □ Create directory structure:
-  mkdir -p raw wiki/cross-role docs artifacts archive graphify-out
+  mkdir -p raw wiki/cross-role docs artifacts archive
 
 □ Create WIKI.md (copy this document's schema sections)
 
@@ -702,10 +648,6 @@ An agent reading this document for the first time should follow these steps to i
 □ Run /wiki ingest for each source
 
 □ After each ingest: verify index.md updated, log.md appended
-
-□ After 10+ pages: run /graphify to see initial structure
-
-□ Read GRAPH_REPORT.md: note god nodes and community structure
 ```
 
 ### Phase 3: Maintenance (recurring)
@@ -714,14 +656,12 @@ An agent reading this document for the first time should follow these steps to i
 □ Weekly: /wiki status (check page counts, recent activity)
 □ Monthly: /wiki lint (catch dead links, orphaned pages)
 □ Per-ingest: /wiki ingest [new materials]
-□ Per-10-pages: /graphify (update knowledge graph)
 □ Per-quarter: Review cross-role synthesis opportunities
 ```
 
 ### Phase 4: Quality Signals
 
 The system is working well when:
-- ✅ Graphify shows 3-6 distinct communities matching your roles
 - ✅ Cross-role pages link to content in 3+ role namespaces
 - ✅ Synthesis pages outnumber source-summary pages (depth > breadth)
 - ✅ No orphaned pages in lint report
@@ -775,7 +715,7 @@ If using Claude Code Skills (`.claude/skills/` directory), map skills to roles:
 | Researcher | tw-research-proposal-diamond, tw-research-citation-checker |
 | Teacher | tw-edu-lesson-plan-108, tw-edu-exam-generator |
 | Developer | tw-weekly-report |
-| All roles | wiki (this skill), graphify |
+| All roles | wiki (this skill) |
 
 Skills augment the wiki system — they provide role-specific workflows that PRODUCE content that then gets ingested into the wiki.
 
@@ -784,4 +724,4 @@ Skills augment the wiki system — they provide role-specific workflows that PRO
 *This document is self-describing and self-sufficient.*
 *An agent that reads it can build an identical system without further instruction.*
 *Version: 1.0 | Specification date: 2026-04-15*
-*Method: Role-based LLM wiki with Git + Obsidian + Notion + Graphify*
+*Method: Role-based LLM wiki with Git + Obsidian + Notion*

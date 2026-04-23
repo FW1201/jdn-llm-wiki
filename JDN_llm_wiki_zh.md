@@ -20,7 +20,7 @@
 - **Git** 是規範性的真相來源與版本歷史
 - **Obsidian** 提供人類可讀的本地編輯環境（透過 obsidian-git 同步）
 - **Notion** 作為任務/產出的匯集點與摘要儀表板（透過 MCP）
-- **知識圖譜**（Graphify）揭示跨頁面的隱藏結構
+- **知識圖譜**：Obsidian 內建圖譜揭示跨頁面的連結結構
 
 ### 1.2 設計公理
 
@@ -65,7 +65,7 @@
 ├── docs/                 ← 人類撰寫的設計文件（非代理維護）
 ├── artifacts/            ← 代理生成的產出物（PDF、簡報、docx）
 ├── archive/              ← 已棄用/已替換的素材
-└── graphify-out/         ← 知識圖譜輸出（自動生成）
+
     ├── GRAPH_REPORT.md   ← 人類可讀的圖譜分析
     ├── graph.html        ← 互動式視覺化
     ├── graph.json        ← 原始圖譜資料
@@ -91,7 +91,6 @@
 | 合成後的 Wiki 頁面 | `wiki/` | ✅ 是 |
 | 設計決策、規格文件 | `docs/` | ❌ 人類專屬 |
 | 生成的產出物（docx、PDF） | `artifacts/` | ✅ 是 |
-| 圖譜輸出 | `graphify-out/` | ✅ 自動生成 |
 
 ---
 
@@ -351,54 +350,9 @@ Wiki 統計（截至 YYYY-MM-DD）
 
 ---
 
-## 6. 知識圖譜整合（Graphify）
+## 6. 知識圖譜
 
-### 6.1 Graphify 的功能
-
-Graphify 掃描專案中的所有檔案，透過 LLM 提取語意節點與邊，將其聚合成社群，並輸出：
-- `graphify-out/GRAPH_REPORT.md` — 人類可讀的分析
-- `graphify-out/graph.html` — 互動式視覺化
-- `graphify-out/graph.json` — 機器可讀的圖譜
-
-### 6.2 何時執行 `/graphify`
-
-| 觸發條件 | 動作 |
-|---------|------|
-| 新 ingest 10 頁以上 | 執行完整 graphify 更新 |
-| 建立新角色命名空間後 | 執行以觀察聚合情況 |
-| 開始大型合成專案前 | 先讀取 GRAPH_REPORT.md |
-| 每月例行維護 | 執行以偵測漂移與孤立頁面 |
-
-### 6.3 閱讀 GRAPH_REPORT.md
-
-**重點檢查段落**：
-
-1. **God Nodes（高連接度節點）** — 連接數最高的節點 = 你的核心抽象
-   - 若 Wiki 頁面是 god node：可能開發不足（太多東西指向它但它未展開）
-   - 若原始素材是 god node：可能需要拆分 ingest 成多頁 Wiki
-
-2. **社群（Communities）** — 偵測到的相關內容叢集
-   - 健康：每個社群大致對應一個角色或子主題
-   - 警告：若兩個角色在同一社群，檢查是否缺少邊界頁面
-   - 警告：若社群只有 1 個成員，代表孤立——加入連結
-
-3. **驚喜連結（Surprising Connections）** — 圖譜推斷出但你未明確建立的邊
-   - 審查這些：部分是值得記錄於跨角色頁面的有效洞察
-   - 其他是因相似術語造成的誤報——加入消歧義
-
-4. **超邊（Hyperedges）** — 群組關係
-   - 代表主題分組；驗證是否符合你的思維模型
-
-### 6.4 增量更新
-
-Graphify 使用檔案雜湊快取（`graphify-out/cache/`）。後續執行時：
-- 未變更的檔案重用快取的提取結果（無 LLM 費用）
-- 只有新增/修改的檔案才重新提取
-- 每次均從完整合併資料集重建圖譜
-
-**快取管理**：
-- 除非想要完整重新提取，否則不要手動刪除快取檔案
-- 若專案中某檔案被刪除，其快取條目會成為孤立 — 執行 `/graphify clean` 清除
+視覺化圖譜導航由 **Obsidian 內建圖譜功能**（Graph View）處理。Graphify 因 token 成本過高於 2026-04-24 移除（每次更新需 230+ 次 LLM 呼叫）。請改用 `/wiki lint` 偵測孤立頁面與缺失連結。
 
 ---
 
@@ -468,8 +422,6 @@ links:
 # 可重新生成的產出物
 artifacts/*.pdf
 artifacts/*.docx
-graphify-out/graph.html
-graphify-out/.graphify_*.json
 
 # 不同步的私人筆記
 docs/private/
@@ -659,7 +611,7 @@ links: []
 ```markdown
 ## [YYYY-MM-DD] {操作} | {簡短描述}
 
-- **操作**：{ingest | query | lint | graphify | update}
+- **操作**：{ingest | query | lint | update}
 - **範圍**：{N 個檔案 / N 頁 / 角色名稱}
 - **結果**：{N 頁建立，N 頁更新，N 個錯誤}
 - **備註**：{任何值得注意的觀察}
@@ -675,7 +627,7 @@ links: []
 
 ```
 □ 建立目錄結構：
-  mkdir -p raw wiki/cross-role docs artifacts archive graphify-out
+  mkdir -p raw wiki/cross-role docs artifacts archive
 
 □ 建立 WIKI.md（複製本文件的 schema 章節）
 
@@ -702,7 +654,6 @@ links: []
 
 □ 每次 ingest 後：驗證 index.md 已更新、log.md 已追加
 
-□ 10 頁以上後：執行 /graphify 觀察初始結構
 
 □ 讀取 GRAPH_REPORT.md：記錄 god nodes 與社群結構
 ```
@@ -713,14 +664,12 @@ links: []
 □ 每週：/wiki status（確認頁面數量、近期活動）
 □ 每月：/wiki lint（捕捉死連結、孤立頁面）
 □ 每次 ingest：/wiki ingest [新素材]
-□ 每 10 頁：/graphify（更新知識圖譜）
 □ 每季：審查跨角色合成機會
 ```
 
 ### 第四階段：品質訊號
 
 系統運作良好時：
-- ✅ Graphify 顯示 3-6 個與你的角色對應的清晰社群
 - ✅ 跨角色頁面連結到 3 個以上角色命名空間的內容
 - ✅ 合成頁面數量超過來源摘要頁面（深度 > 廣度）
 - ✅ lint 報告中無孤立頁面
@@ -728,7 +677,6 @@ links: []
 
 系統需要關注時：
 - ⚠️ 某角色命名空間佔全部頁面的 60% 以上（不平衡）
-- ⚠️ Graphify 顯示 1 個巨大社群（缺少邊界）
 - ⚠️ log.md 超過 30 天無條目（停滯）
 - ⚠️ index.md 列出不存在的頁面（漂移）
 
@@ -774,7 +722,7 @@ title, role, type, sources, created, updated, links
 | 研究者（Researcher） | tw-research-proposal-diamond, tw-research-citation-checker |
 | 教師（Teacher） | tw-edu-lesson-plan-108, tw-edu-exam-generator |
 | 開發者（Developer） | tw-weekly-report |
-| 所有角色 | wiki（本 skill）、graphify |
+| 所有角色 | wiki（本 skill） |
 
 Skills 擴增了 Wiki 系統 — 它們提供角色特定的工作流程，**產生**內容後再 ingest 進入 Wiki。
 
@@ -783,4 +731,4 @@ Skills 擴增了 Wiki 系統 — 它們提供角色特定的工作流程，**產
 *本文件自我描述且自給自足。*  
 *閱讀本文件的代理無需進一步說明即可建立完全相同的系統。*  
 *版本：1.0 ｜ 規格日期：2026-04-15 ｜ 語言版本：繁體中文*  
-*方法論：角色型 LLM Wiki + Git + Obsidian + Notion + Graphify*
+*方法論：角色型 LLM Wiki + Git + Obsidian + Notion*
